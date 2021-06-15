@@ -17,6 +17,8 @@ import VueMoment from 'vue-moment'
 import VueModalTor from "vue-modaltor/dist/vue-modaltor.common";
 import "vue-modaltor/dist/vue-modaltor.css";
 
+import VuePaginate from 'vue-paginate'
+
 
 import GlobalComponents from "./globalComponents";
 import GlobalDirectives from "./globalDirectives";
@@ -47,6 +49,7 @@ Vue.use(SideBar);
 Vue.use(Notify);
 Vue.use(VueAxios, axios);
 Vue.use(VueMoment);
+Vue.use(VuePaginate);
 Vue.use(VueModalTor, { 
   bgOverlay: "rgb(0, 77, 77, 0.7)",
   bgPanel: "#fff"

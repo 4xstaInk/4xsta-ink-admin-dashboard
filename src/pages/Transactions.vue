@@ -69,6 +69,12 @@
   padding-top:6px;
   text-align:center;"><i class="tim-icons icon-paper"></i> PDF</h5>
 
+ <paginate
+  name="transactions"
+  :list="filteredTransactions"
+  :per="Number(number_of_rolls)"
+  :key="search"
+>
              <table class="table">
     <thead>
       <tr 
@@ -92,7 +98,7 @@
     </thead>
     <tbody>
       <tr
-        v-for="Data in filteredTransactions"
+        v-for="Data in paginated('transactions')"
       :key="Data.id"
       style="cursor:pointer"
       @click="viewOneTransaction(Data);open = true"
@@ -115,6 +121,27 @@
       </tr>
     </tbody>
   </table> 
+  </paginate>
+    <div class="float-right">
+              <div class="form-group-sm mb-2">
+      <label for="">Number of rolls: {{number_of_rolls}}</label>
+      <select v-model="number_of_rolls" class="form-control" id="sel1" name="sellist1">
+        <option value="2">2</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option> 
+      </select>
+</div>
+          <paginate-links 
+          for="transactions" 
+          :show-step-links="true"
+          :limit="3"
+          :container-class="'pagination'"
+          class="pagination"
+          :hide-prev-next="true"
+
+  ></paginate-links>
+  </div>
  <div v-if="transactions == ''" class="no-data-providers">
             <span id="no-data-icon">
               <i class="tim-icons icon-alert-circle-exc"></i
@@ -133,13 +160,7 @@
   height:30px;
   padding-top:6px;
   text-align:center;"><i class="tim-icons icon-refresh-01"></i> Reload</h5>
-
-  <ul class="pagination pagination-sm float-right text-dark">
-    <li class="page-item"><a class="page-link" href="#"><i class="tim-icons icon-minimal-left"></i> </a></li>
-    <li class="page-item text-primary"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#"><i class="tim-icons icon-minimal-right"></i></a></li>
-  </ul>
-          </div>
+         </div>
           
       </div>
  <!-- Modal -->
@@ -224,7 +245,11 @@ export default{
           Payment_status:"",
           UserId:""
       },
+      // Fetched transactions
       transactions:[],
+
+      // Paginate Providers
+      paginate: ['transactions'],
     
      // Selected_search_type disbursement_status
       Selected_search_type:"txnId",
@@ -235,7 +260,9 @@ export default{
 
     //   Modal
     open: false,
-      
+
+    // Number of rolls
+    number_of_rolls:2,      
     };
   },
   created(){
@@ -310,7 +337,7 @@ export default{
     // Export PDF method
      exportTransactionsPdf(){
       var vm = this
-    
+      
       var columns = [
         {title: "Txn ID", dataKey: "txnId"},
         {title: "Amount", dataKey: "amount"},
@@ -324,7 +351,7 @@ export default{
         {title: "Channel", dataKey: "channel"},
         {title: "Created At", dataKey: "created_at"},
         ];
-      var doc = new jsPDF();
+      var doc = new jsPDF('p', 'pt');
       doc.text('Transactions',30,20)
       doc.autoTable(columns, vm.transactions);
       doc.save('Transactions.pdf');
@@ -342,8 +369,8 @@ table{
     overflow-x:scroll;
 }
 #heading{
-  margin-right:20%;
-  border-bottom:5px solid rgba(100, 100, 255, 0.767);
+  margin-right:10%;
+  border-bottom:2px solid rgba(100, 100, 255, 0.767);
 }
 #search{
   width:50%;
@@ -351,10 +378,6 @@ table{
 }
 tr:hover{
   background-color: #f2f2f2;
-}
-ul{
-  background-color:lightblue;
-  color: blue;
 }
 #no-data-icon{
     font-size: 70px;

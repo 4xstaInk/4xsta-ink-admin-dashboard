@@ -27,6 +27,48 @@
         <br/>
       <div class="col-12">
           <div class="table-responsive text-left shadow" style="background-color:white;padding:15px;border-radius:15px;overflow:hidden;">
+         <h5
+            @click="downloadCSV()"
+            class="float-left shadow"
+            id="csv"
+            style="
+              cursor: pointer;
+              border-radius: 15px;
+              margin-right: 5px;
+              color: white;
+              width: 100px;
+              background-color: grey;
+              height: 30px;
+              padding-top: 6px;
+              text-align: center;
+            "
+          >
+            <i class="tim-icons icon-paper"></i> CSV
+          </h5>
+          <h5
+          @click="exportUsersPdf()"
+            class="float-left shadow"
+            id="pdf"
+            style="
+              cursor: pointer;
+              border-radius: 15px;
+              color: white;
+              margin-right: 5px;
+              width: 100px;
+              background-color: grey;
+              height: 30px;
+              padding-top: 6px;
+              text-align: center;
+            "
+          >
+            <i class="tim-icons icon-paper"></i> PDF
+          </h5>
+          <paginate
+  name="users"
+  :list="filteredUsers"
+  :per="Number(number_of_rolls)"
+  :key="search"
+>
              <table class="table">
     <thead>
       <tr style="border-bottom:2px solid blue">
@@ -44,7 +86,7 @@
     </thead>
     <tbody>
       <tr 
-      v-for="Data in filteredUsers"
+      v-for="Data in paginated('users')"
       :key="Data.user_id"
       >
         <td>{{Data.first_name}}</td>
@@ -67,6 +109,27 @@
       </tr>
     </tbody>
   </table>
+          </paginate>
+            <div class="float-right">
+              <div class="form-group-sm mb-2">
+      <label for="">Number of rolls: {{number_of_rolls}}</label>
+      <select v-model="number_of_rolls" class="form-control" id="sel1" name="sellist1">
+        <option value="2">2</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option> 
+      </select>
+</div>
+          <paginate-links 
+          for="users" 
+          :show-step-links="true"
+          :limit="3"
+          :container-class="'pagination'"
+          class="pagination"
+          :hide-prev-next="true"
+
+  ></paginate-links>
+  </div>
    <h5
   class="float-left"
    style="
@@ -77,12 +140,6 @@
   height:30px;
   padding-top:6px;
   text-align:center;"><i class="tim-icons icon-refresh-01"></i> Reload</h5>
-
-  <ul class="pagination pagination-sm float-right">
-    <li class="page-item"><a class="page-link" href="#"><i class="tim-icons icon-minimal-left"></i> </a></li>
-    <li class="page-item text-primary"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#"><i class="tim-icons icon-minimal-right"></i></a></li>
-  </ul>
           </div>
           
       </div>
@@ -222,7 +279,7 @@
             v-if=" (email_exist == true) && (username_exist == true)"
             class="float-right"
             style="
-            cursor:no-drop;
+            cursor:pointer;
               border-radius: 15px;
               color: white;
               background-color: #e6e6e6;
@@ -243,13 +300,15 @@
 import axios from "axios";
 import {BaseURL} from "../helpers/http-common.js";
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 export default{
   components:{
   
   },
   data() {
     return {
-     users:[],
      form:{
        Firstname:'',
        Lastname:'',
@@ -259,7 +318,11 @@ export default{
        Role:'',
        Status:''
      },
+    // Fetched Users
+     users:[],
 
+    // Paginate Providers
+      paginate: ['users'],
 
    //   Selected search type
     Selected_search_type:'first_name',
@@ -268,7 +331,10 @@ export default{
    
   // Matching Data
   email_exist:'',
-  username_exist:''
+  username_exist:'',
+
+   // Number of rolls
+     number_of_rolls:'2'
 
     };
   },
@@ -361,7 +427,46 @@ export default{
         
         console.log(this.username_exist);
     },
-  
+  // CSV methods
+    downloadCSV: function(){
+     
+      if (this.users == null) {
+          console.log('Download CSV error '+this.users)
+      }else{
+      let csv = '\ufeff' + 'Firstname,Lastname,Username,email,Role,Phone,Status,Created At,Updated At\n'
+      this.users.forEach(el => {
+        var line = el['first_name'] + ',' + el['last_name'] + ',' + el['username'] + ',' + el['email'] + ',' + el['role'] + ',' + el['phone_number'] + ',' + el['status'] + ',' + el['created_at'] + ',' + el['updated_at'] + '\n'
+        csv += line
+      })
+      var blob = new Blob([ csv ], { "type" : "csv/plain" });
+      let link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'Users.csv'
+      link.click()
+      }
+    },
+
+    // Export PDF method
+     exportUsersPdf(){
+      var vm = this
+      
+      var columns = [
+        {title: "Firstname", dataKey: "first_name"},
+        {title: "Lastname", dataKey: "last_name"},
+        {title: "Username", dataKey: "username"},
+        {title: "Email", dataKey: "email"},
+        {title: "Role", dataKey: "role"},
+        {title: "Phone", dataKey: "phone_number"},
+        {title: "Status", dataKey: "status"},
+        {title: "Created at", dataKey: "created_at"},
+        {title: "Updated At", dataKey: "updated_at"}
+        ];
+      var doc = new jsPDF('p', 'pt');
+      doc.text('Users ',30,20)
+      doc.autoTable(columns, vm.users);
+      doc.save('Users.pdf');
+    },
+
 }
 }
 </script>
@@ -370,6 +475,9 @@ h5:hover{
   border: 1px solid blue;
   transition: 1s;
   }
+  table{
+    overflow-x:scroll;
+}
 #heading{
   margin-right:10%;
   border-bottom:2px solid rgba(100, 100, 255, 0.767);
@@ -378,8 +486,5 @@ h5:hover{
   width:50%;
   border-radius: 50%;
 }
-ul{
-  background-color:lightblue;
-  color: blue;
-}
+
 </style>

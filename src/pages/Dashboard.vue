@@ -1,5 +1,25 @@
 <template>
   <div class="content">
+    <h1>Mesh</h1>
+    <paginate
+  name="languages"
+  :list="posts"
+  :per="5"
+  
+>
+  <li v-for="posts in paginated('languages')">
+    {{ posts.id }}
+  </li>  
+  
+</paginate>
+<paginate-links for="languages" 
+:show-step-links="true"
+:limit="3"
+:active-class="active-button"
+:container-class="'pagination'"
+ class="pagination" 
+
+  ></paginate-links>
     <!-- <div class="row">
       <div class="col-12">
         <card
@@ -168,12 +188,12 @@
           </div>
         </card>
       </div>
-    </div> -->
+    </div> --> 
   </div>
 </template>
 <script>
-
-import {
+import axios from "axios";
+import { 
   Card
 } from "@/components/index";
 
@@ -194,6 +214,9 @@ export default {
   },
   data(){
     return{
+      posts:[],
+      langs: ['JavaScript', 'PHP', 'HTML', 'CSS', 'Ruby', 'Python', 'Erlang'],
+    paginate: ['languages'],
       bigLineChartCategories:[
         "Accounts",
         "Purchases",
@@ -292,7 +315,20 @@ export default {
       return this.$rtl.isRTL;
     }
   },
+  created() {
+    this.fetchUser();
+  },
   methods:{
+     fetchUser(){
+      axios
+        .get("https://jsonplaceholder.typicode.com/photos")
+        .then((response) =>
+          (this.posts = response.data)
+        ).catch(
+   
+        );
+    },
+
     initBigChart(index) {
       let chartData = {
         datasets: [{
@@ -334,4 +370,50 @@ export default {
 }
 </script>
 <style>
+.pagination a {
+  text-align: center;
+    float: right;
+    padding:2px;
+    height: 30px;
+    padding-left:12px;
+    padding-right:12px;
+    padding-top: 5px;
+    text-decoration: none;
+    background-color: lightblue;
+    border-radius: 100%;
+    cursor: pointer;
+    margin: 1px;
+    transition: 1s;
+  }
+   
+.pagination  a.active { 
+    background-color: green;
+  }
+  
+.pagination  a:hover:not(.active) {
+ border: 1px solid blue;
+  transition: 1s;
+  }
+.active-button{
+  background-color: lightcoral;
+}
+/* 
+   .pagination li {
+    float: right;
+    text-decoration: none;
+    margin: 1px;
+    border-radius: 15px;
+    color: black;
+    background-color: white;
+    font-size: 1em;
+  }
+  .pagination li.pagination-active {
+    background-color: green;
+  }
+  
+.pagination  li:hover:not(.active) {background-color: yellow;}
+
+.myActiveBtn{
+  background-color: green;
+ }  */
 </style>

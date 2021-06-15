@@ -10,7 +10,7 @@
               style="cursor: pointer"
               @click="hasHistory() ? $router.go(-1) : $router.push('/')"
             >
-              Provider configuration / <small>{{ providers.data.name }}</small>
+              Provider configuration / <small>{{ providers.name }}</small>
             </h3>
           </div>
         </div>
@@ -41,7 +41,7 @@
                   <td>Provider Name</td>
                   <td>
                     <span v-if="Edit_form == false">{{
-                      providers.data.name
+                      providers.name
                     }}</span>
                     <input
                       v-if="Edit_form == true"
@@ -56,7 +56,7 @@
                   <td>Provider Key</td>
                   <td>
                     <span v-if="Edit_form == false">{{
-                      providers.data.api_key
+                      providers.api_key
                     }}</span>
                     <input
                       v-if="Edit_form == true"
@@ -71,7 +71,7 @@
                   <td>Service ID</td>
                   <td>
                     <span v-if="Edit_form == false">{{
-                      providers.data.id
+                      providers.id
                     }}</span>
                     <select
                       class="form-control"
@@ -94,7 +94,7 @@
                   <td>Client ID</td>
                   <td>
                     <span v-if="Edit_form == false">{{
-                      providers.data.client_id
+                      providers.client_id
                     }}</span>
                     <input
                       v-if="Edit_form == true"
@@ -109,7 +109,7 @@
                   <td>Client Secret</td>
                   <td>
                     <span v-if="Edit_form == false">{{
-                      providers.data.client_secret
+                      providers.client_secret
                     }}</span>
                     <input
                       v-if="Edit_form == true"
@@ -124,7 +124,7 @@
                   <td>Created At</td>
                   <td>
                     {{
-                      providers.data.created_at
+                      providers.created_at
                         | moment("dddd, MMMM Do YYYY, h:mm:ss a")
                     }}
                   </td>
@@ -133,7 +133,7 @@
                   <td>Updated At</td>
                   <td>
                     {{
-                      providers.data.updated_at
+                      providers.updated_at
                         | moment("dddd, MMMM Do YYYY, h:mm:ss a")
                     }}
                   </td>
@@ -209,24 +209,6 @@
             >
               <i class="tim-icons icon-pencil"></i> Edit
             </h5>
-            <h5
-              v-if="Edit_form == false"
-              class="float-left"
-              style="
-                cursor: pointer;
-                border-radius: 15px;
-                color: white;
-                margin-right: 5px;
-                width: 100px;
-                background-color: grey;
-                height: 30px;
-                padding-top: 6px;
-                text-align: center;
-              "
-            >
-              <i class="tim-icons icon-paper"></i> PDF
-            </h5>
-
             <h5
               @click="open = true"
               v-if="Edit_form == false"
@@ -307,6 +289,9 @@
 import axios from "axios";
 import { BaseURL } from "../../helpers/http-common.js";
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 export default {
   components: {
   },
@@ -358,7 +343,8 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         })
-        .then((response) => (this.providers = response.data))
+        .then((response) => (this.providers = response.data.data)
+        )
         .catch((this.fetch_loader = false));
     },
 
@@ -452,12 +438,12 @@ export default {
 
     // Collect the data
     getProviderData() {
-      (this.view.Provider_id = this.providers.data.api_code),
-        (this.view.Provider_name = this.providers.data.name),
-        (this.view.Provider_key = this.providers.data.api_key),
-        (this.view.Service_id = this.providers.data.id),
-        (this.view.Client_id = this.providers.data.client_id),
-        (this.view.Client_secret = this.providers.data.client_secret);
+      (this.view.Provider_id = this.providers.api_code),
+        (this.view.Provider_name = this.providers.name), 
+        (this.view.Provider_key = this.providers.api_key),
+        (this.view.Service_id = this.providers.id),
+        (this.view.Client_id = this.providers.client_id),
+        (this.view.Client_secret = this.providers.client_secret);
     },
   },
 };

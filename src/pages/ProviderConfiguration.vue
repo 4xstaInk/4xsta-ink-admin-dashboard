@@ -25,6 +25,7 @@
             v-model="search"
             placeholder="Search..."
             name="text"
+            v-on:input="filteredProviders()"
             required
           />
         </div>
@@ -40,6 +41,7 @@
           "
         >
           <h5
+            @click="downloadCSV()"
             class="float-left shadow"
             id="csv"
             style="
@@ -57,6 +59,7 @@
             <i class="tim-icons icon-paper"></i> CSV
           </h5>
           <h5
+          @click="exportProvidersPdf()"
             class="float-left shadow"
             id="pdf"
             style="
@@ -73,6 +76,12 @@
           >
             <i class="tim-icons icon-paper"></i> PDF
           </h5>
+          <paginate
+  name="providers"
+  :list="filteredProviders"
+  :per="Number(number_of_rolls)"
+  :key="search"
+>
           <table class="table">
             <thead style="overflow: scroll">
               <tr style="border-bottom: 2px solid blue">
@@ -88,7 +97,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="Data in filteredProviders"
+                v-for="Data in paginated('providers')"
                 :key="Data.id"
                 style="cursor: pointer; overflow: scroll"
               >
@@ -116,8 +125,30 @@
                   </div>
                 </td>
               </tr>
+             
             </tbody>
-          </table>
+          </table> 
+          </paginate>
+          <div class="float-right">
+              <div class="form-group-sm mb-2">
+      <label for="">Number of rolls: {{number_of_rolls}}</label>
+      <select v-model="number_of_rolls" class="form-control" id="sel1" name="sellist1">
+        <option value="2">2</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option> 
+      </select>
+</div>
+          <paginate-links 
+          for="providers" 
+          :show-step-links="true"
+          :limit="3"
+          :container-class="'pagination'"
+          class="pagination"
+          :hide-prev-next="true"
+
+  ></paginate-links>
+  </div>
           <div class="loader" v-if="fetch_loader">
             <Loader />
           </div>
@@ -127,7 +158,7 @@
             ></span>
             <h1>No Avaliable Providers</h1>
           </div>
-          <h5
+          <h5 
             @click="fetchProviders()"
             class="float-left"
             style="
@@ -144,21 +175,6 @@
             <i class="tim-icons icon-refresh-01"></i> Reload
           </h5>
 
-          <ul class="pagination pagination-sm float-right">
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="tim-icons icon-minimal-left"></i>
-              </a>
-            </li>
-            <li class="page-item text-primary">
-              <a class="page-link" href="#">1</a>
-            </li>
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="tim-icons icon-minimal-right"></i
-              ></a>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
@@ -283,6 +299,9 @@
 <script>
 import { BaseURL } from "../helpers/http-common.js";
 import axios from "axios";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 import Loader from "../Loaders/loader.vue";
 export default {
   components: {
@@ -299,16 +318,21 @@ export default {
       },
       // Fetched Providers
       providers: [],
+
+      // Paginate Providers
+      paginate: ['providers'],
+
       // Alerts
       success: "",
       failure: "",
+
       // Service Data
       Service_data: [],
       services: [],
 
       // ViewForm Data
       showForm: "",
-
+ 
       //   Selected search type
       Selected_search_type: "api_key",
 
@@ -319,6 +343,9 @@ export default {
 
       //   Modal
       open: false,
+
+    // Number of rolls
+     number_of_rolls:'2'
     };
   },
   created() {
@@ -333,13 +360,14 @@ export default {
         Data[q].toLowerCase().includes(this.search.toLowerCase())
       );
       return p;
-    },
+    }, 
   },
   methods: {
     //   Get all Providers
     fetchProviders() {
       let token = localStorage.getItem("token");
       this.fetch_loader = true;
+      console.log('Refresh');
       axios
         .get(`${BaseURL}/providers`, {
           headers: {
@@ -405,6 +433,45 @@ export default {
     hideModal() {
       this.open = false;
     },
+    
+    // CSV methods
+    downloadCSV: function(){
+     
+      if (this.providers == null) {
+          console.log('Download CSV error'+this.providers)
+      }else{
+      let csv = '\ufeff' + 'Provider Name,Provider Key,service ID,Client ID,Client Secret,Created At,Updated At\n'
+      this.providers.forEach(el => {
+        var line = el['name'] + ',' + el['api_key'] + ',' + el['service_id'] + ',' + el['client_id'] + ',' + el['client_secret'] + ',' + el['created_at'] + ',' + el['updated_at'] + '\n'
+        csv += line
+      })
+      var blob = new Blob([ csv ], { "type" : "csv/plain" });
+      let link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'Providers.csv'
+      link.click()
+      }
+    },
+
+    // Export PDF method
+     exportProvidersPdf(){
+      var vm = this
+      
+      var columns = [
+        {title: "Provider Name", dataKey: "name"},
+        {title: "Provider Key", dataKey: "api_key"},
+        {title: "Service ID", dataKey: "service_id"},
+        {title: "Client ID", dataKey: "client_id"},
+        {title: "Client Secret", dataKey: "client_secret"},
+        {title: "Created at", dataKey: "created_at"},
+        {title: "Updated At", dataKey: "updated_at"}
+        ];
+      var doc = new jsPDF('p', 'pt');
+      doc.text('Provider Methods',30,20)
+      doc.autoTable(columns, vm.providers);
+      doc.save('Provider_Methods.pdf');
+    },
+
   },
 };
 </script>
@@ -412,6 +479,9 @@ export default {
 h5:hover {
   border: 1px solid blue;
   transition: 1s;
+}
+table{
+    overflow-x:scroll;
 }
 #create-button:hover {
   border: 1px solid blue;
@@ -441,10 +511,10 @@ tr:hover {
   width: 50%;
   border-radius: 50%;
 }
-ul {
+/* ul {
   background-color: lightblue;
   color: blue;
-}
+} */
 
 ::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);

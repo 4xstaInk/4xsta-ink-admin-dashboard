@@ -11,6 +11,7 @@
     "axios": "^0.21.1",
     "chart.js": "^2.8.0",
     "core-js": "^2.6.5",
+    "emailjs-com": "^3.1.0",
     "epic-spinners": "^1.1.0",
     "jspdf": "^2.3.1",
     "jspdf-autotable": "^3.5.14",
@@ -23,6 +24,7 @@
     "vue-i18n": "^8.14.1",
     "vue-modaltor": "^1.5.2",
     "vue-moment": "^4.1.0",
+    "vue-paginate": "^3.6.0",
     "vue-router": "^3.0.3",
     "vue-social-sharing": "^2.4.6",
     "vue2-transitions": "^0.3.0"

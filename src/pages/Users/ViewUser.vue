@@ -187,7 +187,7 @@
   height:30px;
   padding-top:6px;
   text-align:center;"><i class="tim-icons icon-pencil"></i> Edit</h5>
-   <h5
+   <!-- <h5
    v-if="Edit_form == false"
   class="float-left"
    style="
@@ -199,7 +199,7 @@
   background-color:grey;
   height:30px;
   padding-top:6px;
-  text-align:center;"><i class="tim-icons icon-paper"></i> PDF</h5>
+  text-align:center;"><i class="tim-icons icon-paper"></i> PDF</h5> -->
 
    <h5
    @click="open = true"
