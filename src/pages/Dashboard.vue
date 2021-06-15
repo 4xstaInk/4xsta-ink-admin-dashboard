@@ -1,6 +1,15 @@
 <template>
   <div class="content">
-    <h1>Mesh</h1>
+    <!-- <form class="contact-form" @submit.prevent="sendEmail">
+    <label>Name</label>
+    <input type="text" name="user_name">
+    <label>Email</label>
+    <input type="email" name="user_email">
+    <label>Message</label>
+    <textarea name="message"></textarea>
+    <input type="submit" value="Send">
+  </form> -->
+    <!-- <h1>Mesh</h1>
     <paginate
   name="languages"
   :list="posts"
@@ -19,7 +28,7 @@
 :container-class="'pagination'"
  class="pagination" 
 
-  ></paginate-links>
+  ></paginate-links> -->
     <!-- <div class="row">
       <div class="col-12">
         <card
@@ -193,6 +202,7 @@
 </template>
 <script>
 import axios from "axios";
+import emailjs from 'emailjs-com';
 import { 
   Card
 } from "@/components/index";
@@ -319,6 +329,14 @@ export default {
     this.fetchUser();
   },
   methods:{
+     sendEmail: (e) => {
+      emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', e.target, 'YOUR_USER_ID')
+        .then((result) => {
+            console.log('SUCCESS!', result.status, result.text);
+        }, (error) => {
+            console.log('FAILED...', error);
+        });
+    },
      fetchUser(){
       axios
         .get("https://jsonplaceholder.typicode.com/photos")
